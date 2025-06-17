@@ -45,7 +45,13 @@
         <!-- 右侧示例 -->
         <el-col :span="12">
           <div class="canvas-section">
-            <canvas ref="canvasRef" width="400" height="400" class="canvas"></canvas>
+            <canvas 
+              ref="canvasRef" 
+              width="400" 
+              height="400" 
+              class="canvas"
+              @click="handleHexagonClick"
+            ></canvas>
             <div class="canvas-controls">
               <el-button type="primary" @click="drawHexagon">绘制六边形</el-button>
               <el-button @click="clearCanvas">清除画布</el-button>
@@ -75,6 +81,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 const canvasRef1 = ref<HTMLCanvasElement | null>(null)
@@ -201,6 +208,67 @@ const clearCanvas = () => {
   if (!ctx || !canvasRef.value) return
   ctx.clearRect(0, 0, canvasRef.value.width, canvasRef.value.height)
 }
+
+// 判断点是否在六边形内
+const isPointInHexagon = (x: number, y: number, centerX: number, centerY: number, radius: number) => {
+  // 计算点到中心的距离
+  const dx = x - centerX
+  const dy = y - centerY
+  const distance = Math.sqrt(dx * dx + dy * dy)
+  
+  // 如果距离大于半径，点一定在六边形外
+  if (distance > radius) return false
+  
+  // 计算点相对于中心的角度
+  let angle = Math.atan2(dy, dx)
+  if (angle < 0) angle += Math.PI * 2
+  
+  // 计算六边形每个顶点的角度
+  const sides = 6
+  const angleStep = (Math.PI * 2) / sides
+  
+  // 找到点所在的角度区间
+  const sector = Math.floor(angle / angleStep)
+  
+  // 计算该角度区间对应的两个顶点
+  const angle1 = sector * angleStep
+  const angle2 = (sector + 1) * angleStep
+  
+  // 计算这两个顶点到中心的距离
+  const x1 = centerX + radius * Math.cos(angle1)
+  const y1 = centerY + radius * Math.sin(angle1)
+  const x2 = centerX + radius * Math.cos(angle2)
+  const y2 = centerY + radius * Math.sin(angle2)
+  
+  // 计算点到这两个顶点形成的边的距离
+  const lineLength = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
+  const area = Math.abs((x2 - x1) * (y - y1) - (x - x1) * (y2 - y1))
+  const distanceToLine = area / lineLength
+  
+  // 计算该角度下六边形的实际半径（考虑六边形的形状）
+  const actualRadius = radius * Math.cos(Math.PI / sides)
+  
+  // 如果点到中心的距离小于实际半径，则点在六边形内
+  return distance <= actualRadius
+}
+
+// 处理六边形点击事件
+const handleHexagonClick = (e: MouseEvent) => {
+  if (!canvasRef.value) return
+  
+  const rect = canvasRef.value.getBoundingClientRect()
+  const x = e.clientX - rect.left
+  const y = e.clientY - rect.top
+  
+  const centerX = canvasRef.value.width / 2
+  const centerY = canvasRef.value.height / 2
+  const radius = 100
+  
+  if (isPointInHexagon(x, y, centerX, centerY, radius)) {
+    ElMessage.success('点击了六边形！')
+    console.log('点击坐标：', { x, y })
+  }
+}
 </script>
 
 <style lang="less" scoped>
@@ -258,6 +326,7 @@ const clearCanvas = () => {
   border: 1px solid #dcdfe6;
   border-radius: 4px;
   background-color: #fff;
+  cursor: pointer;
 }
 
 .canvas-controls {
