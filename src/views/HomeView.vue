@@ -31,8 +31,8 @@ const menuItems = [
             },
             {
                 index: '2-2',
-                title: '用户资料',
-                path: '/user/profile'
+                title: 'slot插槽',
+                path: '/user/slot'
             }
         ]
     },

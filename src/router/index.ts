@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LoginView from '../views/LoginView.vue'
 import HomeView from '../views/HomeView.vue'
 import Canvas from '../views/user/Canvas.vue'
-import UserProfile from '../views/user/UserProfile.vue'
+import Slotstudy from '../views/user/Slotstudy.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -32,9 +32,9 @@ const router = createRouter({
           meta: { requiresAuth: true }
         },
         {
-          path: 'profile',
-          name: 'userProfile',
-          component: UserProfile,
+          path: 'slot',
+          name: 'slot',
+          component: Slotstudy,
           meta: { requiresAuth: true }
         }
       ]
